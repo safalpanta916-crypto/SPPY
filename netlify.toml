@@ -1,0 +1,36 @@
+[build]
+command = "pnpm --filter @workspace/sppy run build"
+publish = "artifacts/sppy/dist/public"
+functions = "artifacts/sppy/netlify/functions"
+
+[build.environment]
+NODE_VERSION = "22"
+PNPM_VERSION = "10.26.1"
+
+[functions]
+node_bundler = "esbuild"
+
+[[redirects]]
+from = "/api/ai/status"
+to = "/.netlify/functions/ai-status"
+status = 200
+
+[[redirects]]
+from = "/api/ai/chat/stream"
+to = "/.netlify/functions/ai-stream"
+status = 200
+
+[[redirects]]
+from = "/api/ai/chat"
+to = "/.netlify/functions/ai-chat"
+status = 200
+
+[[redirects]]
+from = "/api/ai/attachments"
+to = "/.netlify/functions/ai-attachments"
+status = 200
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200

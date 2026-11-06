@@ -1,0 +1,17 @@
+{
+  "name": "@workspace/sppy-ai",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "mammoth": "^1.13.0",
+    "pdf-parse": "^1.1.4"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/pdf-parse": "^1.1.5"
+  }
+}

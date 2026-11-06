@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: ai
+    description: SPPY AI operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,94 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /ai/status:
+    get:
+      operationId: getAiStatus
+      tags: [ai]
+      summary: Get AI configuration and anonymous usage
+      parameters:
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 16
+            maxLength: 80
+      responses:
+        "200":
+          description: AI readiness and remaining guest messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiStatus"
+  /ai/chat:
+    post:
+      operationId: createAiCompletion
+      tags: [ai]
+      summary: Create a completed AI response
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatInput"
+      responses:
+        "200":
+          description: Completed assistant response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatResponse"
+        "400":
+          description: Invalid request
+        "429":
+          description: Anonymous usage limit reached
+        "503":
+          description: AI provider is not configured
+  /ai/chat/stream:
+    post:
+      operationId: streamAiCompletion
+      tags: [ai]
+      summary: Stream an AI response
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatInput"
+      responses:
+        "200":
+          description: Server-sent events containing response deltas and completion metadata
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        "400":
+          description: Invalid request
+        "429":
+          description: Anonymous usage limit reached
+        "503":
+          description: AI provider is not configured
+  /ai/attachments:
+    post:
+      operationId: extractAiAttachment
+      tags: [ai]
+      summary: Extract text from a temporary attachment
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/AttachmentInput"
+      responses:
+        "200":
+          description: Extracted text, held only for the current request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttachmentText"
+        "400":
+          description: Unsupported, invalid, or oversized attachment
 components:
   schemas:
     HealthStatus:
@@ -33,4 +123,74 @@ components:
           type: string
       required:
         - status
+    AiStatus:
+      type: object
+      properties:
+        configured:
+          type: boolean
+        provider:
+          type: string
+        model:
+          type: string
+        dailyLimit:
+          type: integer
+        remainingToday:
+          type: integer
+      required: [configured, provider, model, dailyLimit, remainingToday]
+    ChatTurn:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+          maxLength: 24000
+      required: [role, content]
+    ChatInput:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          minLength: 16
+          maxLength: 80
+        mode:
+          type: string
+          enum: [general, developer, cyber, study, writer, creative, research]
+        message:
+          type: string
+          minLength: 1
+          maxLength: 12000
+        history:
+          type: array
+          maxItems: 20
+          items:
+            $ref: "#/components/schemas/ChatTurn"
+      required: [sessionId, mode, message, history]
+    ChatResponse:
+      type: object
+      properties:
+        text:
+          type: string
+      required: [text]
+    AttachmentInput:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required: [file]
+    AttachmentText:
+      type: object
+      properties:
+        filename:
+          type: string
+        contentType:
+          type: string
+        text:
+          type: string
+          maxLength: 24000
+        truncated:
+          type: boolean
+      required: [filename, contentType, text, truncated]
 
