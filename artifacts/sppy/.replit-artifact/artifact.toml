@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "SPPY — Official AI by SPPyntex"
+description = "SPPY is a public AI platform by SPPyntex with specialized chat modes, private local conversation history, and a server-side AI integration."
+version = "1.0.0"
+id = "artifacts/sppy"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23690
+
+[services.development]
+run = "pnpm --filter @workspace/sppy run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/sppy", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/sppy/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23690"
+BASE_PATH = "/"

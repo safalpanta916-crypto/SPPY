@@ -1,0 +1,786 @@
+# PROJECT: SPPY — THE OFFICIAL AI PLATFORM BY SPPYNTEX
+
+Build a complete, production-oriented, full-stack AI platform named **SPPY**, officially developed under the SPPyntex brand by Safal Panta.
+
+This is not a static landing page, a chatbot mockup, or a simple frontend demonstration. It must be a genuinely functional, polished AI platform with multiple specialized modes, real AI responses, conversation management, responsive layouts, and a complete public-facing website.
+
+Treat this as a serious independent software product.
+
+---
+
+# 1. PRODUCT IDENTITY AND BRANDING
+
+**Official product name:** SPPY
+
+**Brand:** SPPyntex
+
+**Full identity:** SPPY — Official AI by SPPyntex
+
+**Founder and developer:** Safal Panta
+
+**Primary tagline:** Think beyond limits.
+
+**Alternative brand description:** Your intelligent space for learning, creating, exploring, and building.
+
+The entire product must use SPPY and SPPyntex branding.
+
+Do not display the name of the development platform, its branding, default templates, builder credits, or development-environment references anywhere in the finished product.
+
+The website should feel like an independent, professionally developed AI company product.
+
+## Official logo
+
+I will provide the official SPPyntex logo as an uploaded image.
+
+Use that exact uploaded logo throughout the website:
+- Navigation bar.
+- Chat interface.
+- Loading screens where appropriate.
+- Website favicon.
+- About section.
+- Footer.
+- Mobile navigation.
+- Browser metadata where appropriate.
+
+Do not invent a replacement logo or distort the supplied logo.
+
+If the logo has a transparent background, preserve it.
+
+Create a consistent visual identity around the logo.
+
+---
+
+# 2. DESIGN PHILOSOPHY
+
+The most important design requirement is a premium, minimal, modern SaaS experience.
+
+Take visual inspiration from the quality and usability of established AI products, but create an original SPPY identity.
+
+Design requirements:
+
+- Premium dark-first interface.
+- Optional light mode.
+- Clean typography.
+- Comfortable, readable text sizes.
+- Generous spacing.
+- Subtle borders and shadows.
+- Smooth transitions.
+- Carefully designed interactive states.
+- Consistent icons.
+- Responsive layouts.
+- Minimal visual clutter.
+- No unnecessary gradients everywhere.
+- No excessive glassmorphism.
+- No oversized typography that wastes screen space.
+- No random decorative elements.
+- No generic AI-generated-looking landing page design.
+
+Use a refined palette:
+- Deep charcoal / near-black backgrounds.
+- Slightly lighter elevated surfaces.
+- Soft white primary text.
+- Muted gray secondary text.
+- One restrained SPPY accent color, preferably electric violet or blue.
+- Consistent success, warning, and error states.
+
+Use a modern, readable font such as Inter or Geist.
+
+Text must remain comfortably readable on phones and laptops. Never shrink normal content to tiny sizes.
+
+The design must feel deliberately designed by a human product designer.
+
+All interface copy should sound natural, concise, and professionally written. Avoid repetitive AI marketing phrases, exaggerated promises, robotic wording, and generic filler.
+
+Do not use fake statistics, fabricated testimonials, invented user counts, or unsupported claims.
+
+---
+
+# 3. WEBSITE STRUCTURE
+
+Build the following main sections.
+
+## A. Landing page
+
+The landing page should introduce SPPY.
+
+Include:
+
+1. Navigation bar with SPPY logo.
+2. Product name and short introduction.
+3. Main headline: "Think beyond limits."
+4. A short, natural description of what SPPY does.
+5. Prominent Start Chatting button.
+6. Explore AI Modes section.
+7. Featured capabilities.
+8. Why SPPY section.
+9. SPPyntex ecosystem / projects section.
+10. About the creator section.
+11. Footer with official credits and links.
+
+The main call to action should open the actual chat application.
+
+Do not make the landing page unnecessarily long.
+
+## B. AI chat application
+
+This is the heart of SPPY.
+
+Build a complete chat experience with:
+
+- Left sidebar for conversations.
+- New Chat button.
+- Conversation history.
+- Search conversations.
+- Rename conversations.
+- Delete conversations.
+- Clear conversation history.
+- Main message interface.
+- AI and user message differentiation.
+- Streaming AI responses where supported.
+- Typing/loading indicators.
+- Stop generating button.
+- Regenerate response.
+- Copy response.
+- Copy code.
+- Code syntax highlighting.
+- Markdown rendering.
+- Properly formatted lists and tables.
+- Error handling.
+- Auto-scroll behavior.
+- Scroll-to-bottom button.
+- Responsive sidebar.
+- Mobile-friendly chat layout.
+
+The message composer should support:
+
+- Multiline text input.
+- Enter to send.
+- Shift + Enter for a new line.
+- Send button.
+- Attachment button.
+- Clear input.
+- Suggested prompts when starting a new conversation.
+
+Do not display fake AI responses or pretend that an API request succeeded.
+
+All messages must be connected to a real backend AI integration.
+
+## C. Explore page
+
+Create a dedicated page that introduces all available SPPY modes.
+
+Each mode should have:
+- Name.
+- Icon.
+- Short description.
+- What it can do.
+- A Start button.
+
+Selecting a mode should open the chat with that mode already activated.
+
+## D. About SPPY page
+
+Explain the purpose of the project.
+
+Use natural wording:
+
+"SPPY is an AI platform developed under SPPyntex, created to bring different AI-powered capabilities into one accessible place. The goal is to make artificial intelligence more useful for learning, creativity, programming, productivity, and everyday problem-solving."
+
+Include the creator credit:
+
+"Created and developed by Safal Panta."
+
+Include links to the creator's official GitHub and LinkedIn.
+
+## E. SPPyntex projects page
+
+Create a dedicated section called "Explore the SPPyntex Ecosystem".
+
+Display the following real projects using professional project cards.
+
+1. SPPyntex Cyber Lab
+   URL: https://sppyntex.netlify.app/
+   Description: An interactive cybersecurity learning project.
+
+2. SPPyntex Security Laboratory
+   URL: https://sppyntexsecurity.netlify.app/
+   Description: A cybersecurity learning and security laboratory project.
+
+3. Starfall Protocol
+   URL: https://spp-star.netlify.app/
+   Description: An interactive gaming experience developed under SPPyntex.
+
+Each card should include:
+- Project name.
+- Description.
+- Project category.
+- Visit Project button.
+- Appropriate visual treatment.
+
+All links must open the actual external projects.
+
+Do not invent project features that are not established.
+
+---
+
+# 4. SPPY AI MODES
+
+Create an all-in-one AI experience with specialized modes.
+
+All modes must use actual AI responses rather than predefined demonstrations.
+
+Each mode should have its own system instructions and behavior.
+
+## Mode 1: General AI
+
+The default assistant.
+
+Capabilities:
+- Answer general questions.
+- Explain complicated subjects.
+- Brainstorm ideas.
+- Provide useful recommendations.
+- Summarize information.
+- Help with everyday problems.
+- Explain concepts in different difficulty levels.
+
+## Mode 2: Developer AI
+
+An assistant for programming and software development.
+
+Capabilities:
+- Python, JavaScript, TypeScript, Java, C, C++ and other common languages.
+- Explain code.
+- Debug errors.
+- Generate code examples.
+- Explain programming concepts.
+- Help with web development.
+- Explain APIs and databases.
+- Assist with Git and GitHub.
+- Help with software architecture.
+
+Code must be formatted properly with syntax highlighting.
+
+## Mode 3: Cyber AI
+
+A cybersecurity education and defensive security assistant.
+
+Capabilities:
+- Explain cybersecurity concepts.
+- Explain networking.
+- Discuss common vulnerabilities.
+- Explain OWASP concepts.
+- Analyze security concepts and logs.
+- Explain defensive security practices.
+- Discuss digital forensics.
+- Explain ethical hacking concepts in authorized environments.
+- Help users understand security alerts.
+- Explain incident response.
+
+Keep this mode focused on responsible cybersecurity education, authorized testing, and defense.
+
+## Mode 4: Study AI
+
+An educational assistant.
+
+Capabilities:
+- Explain academic subjects.
+- Simplify difficult topics.
+- Explain mathematics step by step.
+- Help with programming exercises.
+- Explain computer science.
+- Generate revision notes.
+- Summarize study materials.
+- Help users understand concepts rather than simply memorize answers.
+
+## Mode 5: Writer AI
+
+A writing and communication assistant.
+
+Capabilities:
+- Emails.
+- Professional messages.
+- LinkedIn posts.
+- CV and résumé content.
+- Reports.
+- Documentation.
+- Grammar improvement.
+- Rewriting and editing.
+- Summarization.
+- Different writing tones.
+
+Prioritize natural, human-sounding language.
+
+## Mode 6: Creative AI
+
+An assistant for creativity and ideas.
+
+Capabilities:
+- Project ideas.
+- Business brainstorming.
+- App concepts.
+- Website concepts.
+- Creative planning.
+- Naming suggestions.
+- Story concepts.
+- Design direction.
+- Product development ideas.
+
+## Mode 7: Research AI
+
+An assistant for deeper explanations and research.
+
+Capabilities:
+- Break down complex topics.
+- Organize information.
+- Compare concepts.
+- Produce structured research summaries.
+- Explain arguments and evidence.
+- Identify uncertainties.
+- Suggest sources to investigate.
+
+Important: Do not pretend to browse the live internet. If web search is not configured, clearly state that responses are based on the model's available knowledge and supplied information.
+
+Keep the architecture open for adding real web-search functionality later.
+
+---
+
+# 5. REAL AI INTEGRATION
+
+This is a critical requirement.
+
+SPPY must connect to a genuine AI model through a secure server-side API.
+
+Do not create a fake chatbot using hardcoded responses.
+
+Build a provider-independent AI service architecture.
+
+Requirements:
+
+- Secure server-side API calls.
+- Environment-variable-based API configuration.
+- Streaming responses where supported.
+- Conversation context.
+- Mode-specific system prompts.
+- Error handling.
+- Request timeouts.
+- Token or output limits.
+- Appropriate response formatting.
+- Graceful handling of unavailable providers.
+- Easy future model/provider replacement.
+
+Keep provider-specific logic separate from the frontend.
+
+Use an environment variable such as:
+
+AI_API_KEY=
+
+Also support configurable:
+- AI_API_BASE_URL
+- AI_MODEL
+
+Do not expose secrets through frontend JavaScript, public configuration files, GitHub commits, or browser network responses.
+
+Provide an example environment file containing placeholders only.
+
+If credentials are unavailable during development, build the complete integration and a clear setup state explaining that the AI provider needs configuration.
+
+Do not claim the platform is fully operational until a real API key has been configured and tested.
+
+The AI backend should be designed so additional providers can be added without rewriting the application.
+
+---
+
+# 6. PUBLIC ACCESS — NO LOGIN REQUIRED
+
+SPPY should be accessible to everyone.
+
+Do not force users to:
+- Register.
+- Sign in.
+- Verify an email.
+- Connect a social account.
+- Enter personal information.
+
+Users should be able to open the website and immediately start chatting.
+
+Implement:
+- Anonymous guest sessions.
+- Local conversation history.
+- Browser-based preferences.
+- Theme preference persistence.
+- Guest usage tracking.
+- Clear chat history option.
+
+Use local browser storage for guest conversations, with sensible size limits.
+
+Do not store unnecessary personal information.
+
+## Usage limits
+
+Because the service uses paid AI infrastructure, implement reasonable anonymous usage controls.
+
+Include:
+- Configurable daily message limits.
+- Per-session rate limiting.
+- Server-side request validation.
+- Abuse protection.
+- Friendly usage-limit notifications.
+
+Display a small usage indicator in the interface, such as "Messages remaining today".
+
+Make limits configurable through server-side settings.
+
+Never tell users that AI usage is unlimited unless that is actually supported.
+
+Do not implement invasive browser fingerprinting.
+
+---
+
+# 7. FILE ATTACHMENTS
+
+Prepare the application for useful file-based AI interactions.
+
+Allow supported file types such as:
+- PDF.
+- TXT.
+- CSV.
+- DOCX.
+- Common source-code files.
+
+Users should be able to:
+- Upload files.
+- See attached filenames.
+- Remove attachments.
+- Ask questions about their uploaded content.
+
+Where supported, extract text securely on the server and include relevant content in the AI request.
+
+Implement file size limits and validation.
+
+Reject unsupported files and handle parsing failures gracefully.
+
+Do not claim that image understanding or other multimodal capabilities work unless the configured model and backend actually support them.
+
+Temporary uploaded files should not be retained unnecessarily.
+
+---
+
+# 8. CHAT EXPERIENCE DETAILS
+
+Make the chat interface polished and intuitive.
+
+When a user opens a new chat, show a welcome screen:
+
+"Hello, I'm SPPY."
+
+"Your space to explore ideas, solve problems, and create something meaningful."
+
+Show suggested prompt cards:
+
+- Explain something complicated.
+- Help me build a website.
+- Teach me a cybersecurity concept.
+- Help me debug my code.
+- Summarize a document.
+- Brainstorm a new project.
+
+Clicking a suggestion should populate or submit the relevant prompt.
+
+Each conversation should retain its selected AI mode.
+
+Allow users to switch modes without losing their current conversation.
+
+Use subtle animations for:
+- Message appearance.
+- Loading indicators.
+- Sidebar transitions.
+- Modal transitions.
+- Button interactions.
+
+Avoid excessive animation that affects performance.
+
+---
+
+# 9. RESPONSIVE DESIGN
+
+The website must work properly on:
+
+- Desktop computers.
+- MacBooks.
+- Windows laptops.
+- Tablets.
+- Android phones.
+- iPhones.
+
+Desktop:
+- Full sidebar.
+- Spacious chat panel.
+- Balanced content width.
+
+Tablet:
+- Collapsible sidebar.
+- Properly sized controls.
+- Responsive layouts.
+
+Mobile:
+- Compact navigation.
+- Slide-out chat history.
+- Full-width message composer.
+- Proper keyboard handling.
+- Touch-friendly buttons.
+- No horizontal overflow.
+- Proper spacing around phone safe areas.
+
+Test the application at different screen widths.
+
+Do not simply scale the desktop design down. Design a proper mobile experience.
+
+---
+
+# 10. SPPYNTEX BRAND CREDITS
+
+Brand attribution is mandatory.
+
+The website must consistently identify SPPY as an official SPPyntex project.
+
+Every major page should include a consistent footer or appropriate compact attribution.
+
+Use the following wording:
+
+"Built by SPPyntex"
+
+"Created & developed by Safal Panta"
+
+"© 2026 SPPyntex. All rights reserved."
+
+Use a clickable SPPyntex brand link where appropriate.
+
+Include this attribution in:
+- Landing page.
+- Chat application.
+- Explore page.
+- About page.
+- Projects page.
+- Other public-facing informational pages.
+
+For the chat interface, use a compact footer so it does not interfere with the conversation.
+
+Do not add an enormous footer to every screen.
+
+---
+
+# 11. OFFICIAL CREATOR LINKS
+
+Use the following exact links.
+
+LinkedIn:
+https://www.linkedin.com/in/safal-panta-a69958415/
+
+GitHub:
+https://github.com/safalpanta916-crypto
+
+Create a creator section:
+
+**Safal Panta**
+
+Founder & Developer of SPPyntex
+
+"Building projects around cybersecurity, artificial intelligence, programming, and technology."
+
+Buttons:
+- Visit LinkedIn.
+- Explore GitHub.
+
+Open external links safely in a new tab.
+
+Do not invent additional social media profiles.
+
+---
+
+# 12. ADDITIONAL FUNCTIONAL REQUIREMENTS
+
+Include:
+
+- Dark/light theme switch.
+- Settings panel.
+- Responsive navigation.
+- Accessible keyboard interactions.
+- Proper loading states.
+- Toast notifications.
+- Error messages.
+- Confirmation dialogs for destructive actions.
+- Custom 404 page.
+- Page titles and metadata.
+- Favicon using the supplied brand identity.
+- Basic SEO metadata.
+- Privacy policy.
+- Terms of use.
+
+The Privacy Policy and Terms must accurately describe the actual data collection, guest storage, AI provider processing, and usage limitations.
+
+Do not invent legal guarantees or claim that conversations are never processed by third parties if an external AI provider is used.
+
+---
+
+# 13. TECHNICAL ARCHITECTURE
+
+Use a maintainable full-stack architecture.
+
+Preferred stack:
+
+Frontend:
+- React.
+- TypeScript.
+- Vite.
+- Tailwind CSS.
+- Accessible UI components.
+- Lucide icons.
+
+Backend:
+- Secure server-side AI integration.
+- Netlify Functions-compatible API endpoints.
+- Server-side validation.
+- Rate limiting.
+- Provider abstraction.
+
+Hosting:
+- Netlify-compatible frontend build.
+- Netlify Functions for the AI API and related server operations.
+- No dependency on a permanently running local development server in production.
+
+Database:
+- Local browser storage for guest conversations.
+- Optional PostgreSQL integration for future expansion.
+- Do not make registration or database accounts a requirement for public use.
+
+Structure the project clearly:
+
+src/
+  components/
+  pages/
+  layouts/
+  hooks/
+  services/
+  lib/
+  styles/
+  types/
+
+netlify/
+  functions/
+
+public/
+  assets/
+
+Keep the code readable and modular.
+
+Do not put the entire application into one giant component.
+
+Avoid unnecessary dependencies.
+
+Use TypeScript types properly.
+
+Keep configuration separate from application logic.
+
+Include a complete README explaining:
+- Project overview.
+- Features.
+- Technology stack.
+- Local development.
+- Environment variables.
+- AI provider configuration.
+- Production deployment.
+- Netlify Functions configuration.
+- Security considerations.
+
+---
+
+# 14. DEPLOYMENT REQUIREMENTS
+
+I intend to maintain the source code in my personal GitHub account and deploy the finished website through Netlify.
+
+Therefore:
+
+- Build the frontend with a production-ready build command.
+- Configure the correct build output directory.
+- Include Netlify configuration.
+- Include function configuration.
+- Add SPA routing redirects where necessary.
+- Ensure API endpoints work in production.
+- Do not rely on localhost in production.
+- Do not hardcode API keys.
+- Include an environment-variable setup guide.
+- Ensure the application can be built from a clean GitHub clone.
+
+Do not assume that a frontend-only deployment automatically provides a working AI backend.
+
+The project must have a clear and tested deployment architecture.
+
+---
+
+# 15. QUALITY AND COMPLETION REQUIREMENTS
+
+Do not stop after generating a homepage.
+
+Build the actual working product.
+
+Before considering the project complete, verify:
+
+1. All navigation works.
+2. All AI modes open correctly.
+3. Real AI requests reach the backend.
+4. Responses are displayed correctly.
+5. Streaming works if supported.
+6. Chat history works.
+7. Conversations persist locally.
+8. Theme switching works.
+9. File validation works.
+10. Usage limits are enforced server-side.
+11. Mobile layouts work.
+12. External links are correct.
+13. No branding from the development environment appears.
+14. No broken buttons or placeholder interactions remain.
+15. The project builds successfully.
+16. No API secrets are exposed.
+17. Netlify routing and serverless functions are configured correctly.
+
+Do not substitute screenshots or fake data for working functionality.
+
+If a feature depends on external credentials, implement its integration and clearly document the required configuration.
+
+Fix build errors before finishing.
+
+---
+
+# 16. FINAL PRODUCT VISION
+
+The finished product should feel like a legitimate independent AI platform.
+
+A user should be able to visit SPPY, open a conversation, choose an AI mode, ask a question, receive a genuine AI response, continue the conversation, and return later to their saved local chat history.
+
+The experience should be straightforward enough for a first-time user and capable enough to be useful for developers, students, creators, and everyday users.
+
+The product must have its own identity, not look like a copied ChatGPT interface.
+
+The most important priorities are:
+
+1. Real AI functionality.
+2. Premium and readable UI.
+3. Multiple useful AI modes.
+4. Public access without mandatory registration.
+5. Security and responsible usage.
+6. Excellent mobile responsiveness.
+7. Strong SPPyntex branding.
+8. Reliable GitHub-to-Netlify deployment.
+
+**Final branding:**
+
+SPPY
+
+Official AI by SPPyntex.
+
+Think beyond limits.
+
+Created & developed by Safal Panta.
+
+Build the complete application with attention to detail. Make thoughtful product decisions where details are unspecified. Prioritize a reliable, functional product over unnecessary visual effects.
