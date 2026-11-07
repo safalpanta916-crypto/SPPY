@@ -5,7 +5,6 @@ import {
   consumeGuestMessage,
   json,
   providerError,
-} from "./_shared.mjs";
 } from "../lib/shared.mjs";
 
 export default async function handler(request: Request): Promise<Response> {

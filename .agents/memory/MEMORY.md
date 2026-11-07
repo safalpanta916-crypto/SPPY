@@ -1,0 +1,1 @@
+- [Motion Lab privacy boundary](motion-lab-privacy.md) — Video stays local; voice is opt-in and transcription is sent only after the user submits it.

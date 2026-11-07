@@ -4,6 +4,8 @@ import { useCreateAiCompletion, useExtractAiAttachment, useGetAiStatus, useHealt
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { VoiceInputControls, VoiceOutputControls } from '@/components/voice-controls';
+import MotionLabPage from '@/pages/motion-lab';
 import { Route, Switch, Link, useLocation, useParams, Router as WouterRouter } from 'wouter';
 import { ArrowDown, ArrowLeft, ArrowRight, BookOpen, Check, ChevronDown, Code2, Copy, Cpu, FileText, Globe2, ImagePlus, LoaderCircle, Menu, MessageSquare, Moon, MoreHorizontal, Pencil, Plus, Search, Send, Settings2, Shield, Sparkles, Square, Sun, Trash2, X, WandSparkles, WifiOff } from 'lucide-react';
 import type { AttachmentText, ChatTurn } from '@workspace/api-client-react';
@@ -13,6 +15,7 @@ type Attachment = AttachmentText;
 type Message = { id: string; role: 'user' | 'assistant'; content: string; createdAt: string; attachments?: Attachment[] };
 type Conversation = { id: string; title: string; mode: Mode; createdAt: string; updatedAt: string; messages: Message[] };
 type Theme = 'dark' | 'light';
+type VoicePreferences = { enabled: boolean; rate: number; voiceName: string };
 
 const queryClient = new QueryClient();
 const STORE_KEY = 'sppy.workspace.v1';
@@ -49,6 +52,16 @@ function readConversations(): Conversation[] {
 }
 function readTheme(): Theme {
   try { return JSON.parse(localStorage.getItem(PREF_KEY) || '{}').theme === 'light' ? 'light' : 'dark'; } catch { return 'dark'; }
+}
+function readVoicePreferences(): VoicePreferences {
+  try {
+    const stored = JSON.parse(localStorage.getItem(PREF_KEY) || '{}');
+    return {
+      enabled: stored.voiceEnabled === true,
+      rate: typeof stored.voiceRate === 'number' ? Math.max(0.75, Math.min(1.25, stored.voiceRate)) : 1,
+      voiceName: typeof stored.voiceName === 'string' ? stored.voiceName : '',
+    };
+  } catch { return { enabled: false, rate: 1, voiceName: '' }; }
 }
 function shorten(text: string) { return text.replace(/\s+/g, ' ').trim().slice(0, 54) || 'New conversation'; }
 function safeHtml(text: string) {
@@ -92,6 +105,7 @@ function SiteHeader({ theme, toggleTheme }: { theme: Theme; toggleTheme: () => v
     <Brand />
     <nav className="hidden items-center gap-7 text-[13px] text-muted-foreground md:flex" aria-label="Main navigation">
       <Link href="/explore" className="transition hover:text-foreground" data-testid="link-explore">Explore</Link>
+      <Link href="/motion-lab" className="transition hover:text-foreground" data-testid="link-motion-lab">Motion Lab</Link>
       <Link href="/projects" className="transition hover:text-foreground" data-testid="link-projects">Projects</Link>
       <Link href="/about" className="transition hover:text-foreground" data-testid="link-about">About</Link>
     </nav>
@@ -101,7 +115,7 @@ function SiteHeader({ theme, toggleTheme }: { theme: Theme; toggleTheme: () => v
       <button onClick={() => setMenuOpen(!menuOpen)} className="grid h-9 w-9 place-items-center rounded-lg hover:bg-secondary md:hidden" aria-label="Open navigation" data-testid="button-mobile-menu"><Menu size={18} /></button>
     </div>
     {menuOpen && <div className="absolute right-4 top-[60px] flex w-48 flex-col rounded-xl border border-border bg-card p-2 shadow-xl md:hidden">
-      {[['Explore', '/explore'], ['Projects', '/projects'], ['About', '/about'], ['Open SPPY', '/chat']].map(([label, href]) => <Link href={href} key={href} onClick={() => setMenuOpen(false)} className="rounded-lg px-3 py-2.5 text-sm hover:bg-secondary" data-testid={`link-mobile-${label.toLowerCase().replaceAll(' ', '-')}`}>{label}</Link>)}
+      {[['Explore', '/explore'], ['Motion Lab', '/motion-lab'], ['Projects', '/projects'], ['About', '/about'], ['Open SPPY', '/chat']].map(([label, href]) => <Link href={href} key={href} onClick={() => setMenuOpen(false)} className="rounded-lg px-3 py-2.5 text-sm hover:bg-secondary" data-testid={`link-mobile-${label.toLowerCase().replaceAll(' ', '-')}`}>{label}</Link>)}
     </div>}
   </header>;
 }
@@ -167,7 +181,7 @@ function Sidebar({ conversations, activeId, onNew, onRename, onDelete, onClear, 
         <button onClick={() => setMenuId(menuId === item.id ? '' : item.id)} className="mr-1 grid h-7 w-7 shrink-0 place-items-center rounded-md opacity-0 hover:bg-background group-hover:opacity-100 focus:opacity-100" aria-label="Conversation options" data-testid={`button-conversation-options-${item.id}`}><MoreHorizontal size={15} /></button>
         {menuId === item.id && <div className="absolute right-2 top-9 z-30 w-36 rounded-xl border border-border bg-card p-1 shadow-xl"><button onClick={() => { onRename(item); setMenuId(''); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs hover:bg-secondary" data-testid={`button-rename-${item.id}`}><Pencil size={13} />Rename</button><button onClick={() => { onDelete(item); setMenuId(''); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-destructive hover:bg-secondary" data-testid={`button-delete-${item.id}`}><Trash2 size={13} />Delete</button></div>}
       </div>)}
-      {!search && <div className="mt-6 border-t border-border/70 px-2 pt-4"><Link href="/explore" className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs ${location === '/explore' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary'}`} onClick={() => setMobileOpen(false)} data-testid="link-sidebar-explore"><Sparkles size={14} />Explore modes</Link><Link href="/projects" className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs text-muted-foreground hover:bg-secondary" onClick={() => setMobileOpen(false)} data-testid="link-sidebar-projects"><Cpu size={14} />SPPyntex projects</Link><Link href="/about" className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs text-muted-foreground hover:bg-secondary" onClick={() => setMobileOpen(false)} data-testid="link-sidebar-about"><BookOpen size={14} />About SPPY</Link></div>}
+      {!search && <div className="mt-6 border-t border-border/70 px-2 pt-4"><Link href="/explore" className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs ${location === '/explore' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary'}`} onClick={() => setMobileOpen(false)} data-testid="link-sidebar-explore"><Sparkles size={14} />Explore modes</Link><Link href="/motion-lab" className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs ${location === '/motion-lab' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary'}`} onClick={() => setMobileOpen(false)} data-testid="link-sidebar-motion-lab"><WandSparkles size={14} />Motion Lab</Link><Link href="/projects" className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs text-muted-foreground hover:bg-secondary" onClick={() => setMobileOpen(false)} data-testid="link-sidebar-projects"><Cpu size={14} />SPPyntex projects</Link><Link href="/about" className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs text-muted-foreground hover:bg-secondary" onClick={() => setMobileOpen(false)} data-testid="link-sidebar-about"><BookOpen size={14} />About SPPY</Link></div>}
     </div>
     <div className="border-t border-border/70 p-3"><div className="mb-2 flex items-center gap-2 rounded-lg bg-background/55 px-2.5 py-2"><span className="h-1.5 w-1.5 rounded-full bg-primary" /><span className="text-[10px] text-muted-foreground">Guest workspace · local history</span></div><div className="flex gap-1"><button onClick={onOpenSettings} className="flex flex-1 items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground" data-testid="button-settings"><Settings2 size={14} />Settings</button><button onClick={onClear} className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-destructive" title="Clear all conversations" aria-label="Clear all conversations" data-testid="button-clear-history"><Trash2 size={14} /></button></div></div>
   </div>;
@@ -185,8 +199,65 @@ function RenameDialog({ item, onSave, onCancel }: { item: Conversation; onSave: 
   return <div className="fixed inset-0 z-[60] grid place-items-center bg-black/65 p-4" role="dialog" aria-modal="true" data-testid="dialog-rename"><form onSubmit={(e) => { e.preventDefault(); if (value.trim()) onSave(value.trim()); }} className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-2xl"><h2 className="display text-xl font-bold">Rename conversation</h2><input autoFocus value={value} onChange={(e) => setValue(e.target.value)} className="mt-5 h-11 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none focus:border-primary" aria-label="Conversation title" data-testid="input-rename-conversation" /><div className="mt-5 flex justify-end gap-2"><button type="button" onClick={onCancel} className="rounded-lg border border-border px-3.5 py-2 text-sm" data-testid="button-rename-cancel">Cancel</button><button className="rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground" data-testid="button-rename-save">Save name</button></div></form></div>;
 }
 
-function SettingsDialog({ theme, toggleTheme, onClear, onClose }: { theme: Theme; toggleTheme: () => void; onClear: () => void; onClose: () => void }) {
-  return <div className="fixed inset-0 z-[60] grid place-items-center bg-black/65 p-4" role="dialog" aria-modal="true" data-testid="dialog-settings"><div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl"><div className="flex items-start justify-between"><div><span className="mono text-[10px] tracking-widest text-primary">PREFERENCES</span><h2 className="display mt-1 text-2xl font-bold">Settings</h2></div><button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-lg hover:bg-secondary" aria-label="Close settings" data-testid="button-close-settings"><X size={16} /></button></div><div className="mt-6 divide-y divide-border"><div className="flex items-center justify-between py-4"><div><p className="text-sm font-semibold">Appearance</p><p className="mt-1 text-xs text-muted-foreground">Choose the workspace theme.</p></div><button onClick={toggleTheme} className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs" data-testid="button-settings-theme">{theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}{theme === 'dark' ? 'Light' : 'Dark'} mode</button></div><div className="py-4"><p className="text-sm font-semibold">Conversation storage</p><p className="mt-1 text-xs leading-5 text-muted-foreground">Saved in this browser only. SPPY does not save guest conversations to a server.</p></div><div className="flex items-center justify-between py-4"><div><p className="text-sm font-semibold">Clear local history</p><p className="mt-1 text-xs text-muted-foreground">Permanently remove this browser’s chats.</p></div><button onClick={onClear} className="rounded-lg border border-destructive/40 px-3 py-2 text-xs text-destructive hover:bg-destructive/10" data-testid="button-settings-clear">Clear history</button></div></div><button onClick={onClose} className="mt-3 w-full rounded-lg bg-secondary px-4 py-2.5 text-sm" data-testid="button-settings-done">Done</button></div></div>;
+function SettingsDialog({
+  theme,
+  toggleTheme,
+  onClear,
+  onClose,
+  voiceEnabled,
+  onVoiceEnabledChange,
+  voiceRate,
+  onVoiceRateChange,
+  voiceName,
+  onVoiceNameChange,
+}: {
+  theme: Theme;
+  toggleTheme: () => void;
+  onClear: () => void;
+  onClose: () => void;
+  voiceEnabled: boolean;
+  onVoiceEnabledChange: (enabled: boolean) => void;
+  voiceRate: number;
+  onVoiceRateChange: (rate: number) => void;
+  voiceName: string;
+  onVoiceNameChange: (name: string) => void;
+}) {
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  useEffect(() => {
+    if (!('speechSynthesis' in window)) return;
+    const update = () => setVoices(window.speechSynthesis.getVoices());
+    update();
+    window.speechSynthesis.addEventListener('voiceschanged', update);
+    return () => window.speechSynthesis.removeEventListener('voiceschanged', update);
+  }, []);
+  return <div className="fixed inset-0 z-[60] grid place-items-center bg-black/65 p-4" role="dialog" aria-modal="true" data-testid="dialog-settings">
+    <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl">
+      <div className="flex items-start justify-between"><div><span className="mono text-[10px] tracking-widest text-primary">PREFERENCES</span><h2 className="display mt-1 text-2xl font-bold">Settings</h2></div><button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-lg hover:bg-secondary" aria-label="Close settings" data-testid="button-close-settings"><X size={16} /></button></div>
+      <div className="mt-6 divide-y divide-border">
+        <div className="flex items-center justify-between py-4"><div><p className="text-sm font-semibold">Appearance</p><p className="mt-1 text-xs text-muted-foreground">Choose the workspace theme.</p></div><button onClick={toggleTheme} className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs" data-testid="button-settings-theme">{theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}{theme === 'dark' ? 'Light' : 'Dark'} mode</button></div>
+        <div className="py-4" data-testid="settings-voice">
+          <div className="flex items-start justify-between gap-4">
+            <div><p className="text-sm font-semibold">Response voice</p><p className="mt-1 max-w-[250px] text-xs leading-5 text-muted-foreground">Optional browser speech. Responses are read only when you press Play.</p></div>
+            <input type="checkbox" checked={voiceEnabled} onChange={(event) => onVoiceEnabledChange(event.target.checked)} aria-label="Enable response voice" className="mt-1 h-4 w-4 accent-primary" data-testid="toggle-voice-output" />
+          </div>
+          {voiceEnabled && <div className="mt-4 grid gap-3">
+            <label className="grid gap-1.5 text-xs text-muted-foreground">Speech rate <span className="text-foreground">{voiceRate.toFixed(2)}×</span>
+              <input type="range" min="0.75" max="1.25" step="0.05" value={voiceRate} onChange={(event) => onVoiceRateChange(Number(event.target.value))} aria-label="Speech rate" className="accent-primary" data-testid="input-voice-rate" />
+            </label>
+            {voices.length > 0 && <label className="grid gap-1.5 text-xs text-muted-foreground">Browser voice
+              <select value={voiceName} onChange={(event) => onVoiceNameChange(event.target.value)} className="h-9 rounded-lg border border-input bg-background px-2 text-foreground" data-testid="select-voice-name">
+                <option value="">Default voice</option>
+                {voices.map((voice) => <option key={`${voice.name}-${voice.lang}`} value={voice.name}>{voice.name} · {voice.lang}</option>)}
+              </select>
+            </label>}
+          </div>}
+        </div>
+        <div className="py-4"><p className="text-sm font-semibold">Conversation storage</p><p className="mt-1 text-xs leading-5 text-muted-foreground">Saved in this browser only. SPPY does not save guest conversations to a server.</p></div>
+        <div className="flex items-center justify-between py-4"><div><p className="text-sm font-semibold">Clear local history</p><p className="mt-1 text-xs text-muted-foreground">Permanently remove this browser’s chats.</p></div><button onClick={onClear} className="rounded-lg border border-destructive/40 px-3 py-2 text-xs text-destructive hover:bg-destructive/10" data-testid="button-settings-clear">Clear history</button></div>
+      </div>
+      <button onClick={onClose} className="mt-3 w-full rounded-lg bg-secondary px-4 py-2.5 text-sm" data-testid="button-settings-done">Done</button>
+    </div>
+  </div>;
 }
 
 function ModeMenu({ mode, onChange }: { mode: Mode; onChange: (mode: Mode) => void }) {
@@ -196,19 +267,19 @@ function ModeMenu({ mode, onChange }: { mode: Mode; onChange: (mode: Mode) => vo
   return <div className="relative"><button onClick={() => setOpen(!open)} className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-muted-foreground transition hover:bg-secondary hover:text-foreground" data-testid="button-select-mode"><Icon size={14} className="text-primary" />{selected.name}<ChevronDown size={13} /></button>{open && <div className="absolute left-0 top-11 z-40 w-[280px] rounded-xl border border-border bg-card p-1.5 shadow-2xl">{modes.map((item) => { const ItemIcon = item.icon; return <button key={item.id} onClick={() => { onChange(item.id); setOpen(false); }} className={`flex w-full items-start gap-3 rounded-lg p-2.5 text-left hover:bg-secondary ${mode === item.id ? 'bg-secondary/70' : ''}`} data-testid={`button-mode-${item.id}`}><ItemIcon size={15} className="mt-0.5 text-primary" /><span><span className="block text-xs font-semibold">{item.name}</span><span className="mt-0.5 block text-[10px] leading-4 text-muted-foreground">{item.description}</span></span>{mode === item.id && <Check size={14} className="ml-auto text-primary" />}</button>; })}</div>}</div>;
 }
 
-function MessageBody({ message, onCopy, onRegenerate, lastAssistant, streaming }: { message: Message; onCopy: (text: string) => void; onRegenerate: () => void; lastAssistant: boolean; streaming: boolean }) {
+function MessageBody({ message, onCopy, onRegenerate, lastAssistant, streaming, voiceEnabled, voiceRate, voiceName }: { message: Message; onCopy: (text: string) => void; onRegenerate: () => void; lastAssistant: boolean; streaming: boolean; voiceEnabled: boolean; voiceRate: number; voiceName: string }) {
   return <div className={`group flex gap-3 md:gap-4 ${message.role === 'user' ? 'flex-row-reverse' : ''}`} data-testid={`message-${message.role}-${message.id}`}>
     {message.role === 'assistant' ? <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-primary/25 bg-accent text-accent-foreground"><Sparkles size={15} /></div> : <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-secondary text-[10px] font-bold text-muted-foreground">YOU</div>}
     <div className={`min-w-0 max-w-[min(760px,88%)] ${message.role === 'user' ? 'rounded-2xl rounded-tr-sm bg-secondary px-4 py-3' : 'pt-1'}`}>
       {message.attachments?.length ? <div className="mb-2 flex flex-wrap gap-1.5">{message.attachments.map((file) => <span key={file.filename} className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-[10px] text-muted-foreground"><FileText size={11} />{file.filename}</span>)}</div> : null}
       {message.role === 'assistant' ? message.content ? <div className="message-content text-[14px] leading-7" dangerouslySetInnerHTML={{ __html: safeHtml(message.content) }} data-testid={`content-message-${message.id}`} /> : streaming ? <span className="inline-flex items-center gap-2 text-sm text-muted-foreground"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />Thinking…</span> : null : <p className="whitespace-pre-wrap text-[14px] leading-6" data-testid={`content-message-${message.id}`}>{message.content}</p>}
-      {message.role === 'assistant' && message.content && <div className="mt-3 flex items-center gap-1 opacity-100 transition md:opacity-0 md:group-hover:opacity-100"><button onClick={() => onCopy(message.content)} className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[10px] text-muted-foreground hover:bg-secondary hover:text-foreground" data-testid={`button-copy-message-${message.id}`}><Copy size={12} />Copy</button>{lastAssistant && !streaming && <button onClick={onRegenerate} className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[10px] text-muted-foreground hover:bg-secondary hover:text-foreground" data-testid="button-regenerate"><ArrowDown size={12} className="rotate-180" />Regenerate</button>}</div>}
+      {message.role === 'assistant' && message.content && <div className="mt-3 flex flex-wrap items-center gap-1 opacity-100 transition md:opacity-0 md:group-hover:opacity-100"><button onClick={() => onCopy(message.content)} className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[10px] text-muted-foreground hover:bg-secondary hover:text-foreground" data-testid={`button-copy-message-${message.id}`}><Copy size={12} />Copy</button>{voiceEnabled && !streaming && <VoiceOutputControls text={message.content} rate={voiceRate} voiceName={voiceName} />}{lastAssistant && !streaming && <button onClick={onRegenerate} className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[10px] text-muted-foreground hover:bg-secondary hover:text-foreground" data-testid="button-regenerate"><ArrowDown size={12} className="rotate-180" />Regenerate</button>}</div>}
     </div>
   </div>;
 }
 
-function ChatScreen({ theme, toggleTheme, conversations, setConversations, onNew, onRename, onDelete, onClear, onSettings, mobileOpen, setMobileOpen, setNotice }: {
-  theme: Theme; toggleTheme: () => void; conversations: Conversation[]; setConversations: (items: Conversation[] | ((previous: Conversation[]) => Conversation[])) => void; onNew: () => void; onRename: (item: Conversation) => void; onDelete: (item: Conversation) => void; onClear: () => void; onSettings: () => void; mobileOpen: boolean; setMobileOpen: (value: boolean) => void; setNotice: (text: string) => void;
+function ChatScreen({ theme, toggleTheme, conversations, setConversations, onNew, onRename, onDelete, onClear, onSettings, mobileOpen, setMobileOpen, setNotice, voiceEnabled, voiceRate, voiceName }: {
+  theme: Theme; toggleTheme: () => void; conversations: Conversation[]; setConversations: (items: Conversation[] | ((previous: Conversation[]) => Conversation[])) => void; onNew: () => void; onRename: (item: Conversation) => void; onDelete: (item: Conversation) => void; onClear: () => void; onSettings: () => void; mobileOpen: boolean; setMobileOpen: (value: boolean) => void; setNotice: (text: string) => void; voiceEnabled: boolean; voiceRate: number; voiceName: string;
 }) {
   const params = useParams<{ conversationId?: string }>();
   const [, setLocation] = useLocation();
@@ -290,7 +361,14 @@ function ChatScreen({ theme, toggleTheme, conversations, setConversations, onNew
     setConversations((items) => items.map((item) => item.id === id ? { ...item, messages: item.messages.map((msg) => msg.role === 'assistant' && msg.content === '' ? { ...msg, content: text } : msg), updatedAt: new Date().toISOString() } : item));
   };
   const queryMode = new URLSearchParams(window.location.search).get('mode');
-  useEffect(() => { setDraft(''); setAttachments([]); setLocalError(''); setModeDraft(active?.mode || (modes.some((item) => item.id === queryMode) ? queryMode as Mode : 'general')); }, [requestedId, active?.mode, queryMode]);
+  const queryPrompt = new URLSearchParams(window.location.search).get('prompt');
+  useEffect(() => {
+    setDraft(queryPrompt || '');
+    setAttachments([]);
+    setLocalError('');
+    setModeDraft(active?.mode || (modes.some((item) => item.id === queryMode) ? queryMode as Mode : 'general'));
+    if (queryPrompt) requestAnimationFrame(() => inputRef.current?.focus());
+  }, [requestedId, active?.mode, queryMode, queryPrompt]);
   useEffect(() => { if (active?.messages.length) scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' }); }, [active?.messages.length, active?.messages.at(-1)?.content]);
   const modify = useCallback((id: string, fn: (c: Conversation) => Conversation) => setConversations(conversations.map((c) => c.id === id ? fn(c) : c)), [conversations, setConversations]);
   const setMode = (mode: Mode) => {
@@ -366,14 +444,14 @@ function ChatScreen({ theme, toggleTheme, conversations, setConversations, onNew
       </header>
       {!statusLoading && status?.configured === false && <div className="flex items-center gap-3 border-b border-primary/20 bg-primary/5 px-4 py-2.5 text-xs text-muted-foreground md:px-8" role="status" data-testid="status-provider-not-configured"><WifiOff size={14} className="shrink-0 text-primary" /><span><strong className="text-foreground">AI is not configured.</strong> SPPY is ready, but its AI provider has not been connected yet.</span></div>}
       {active && active.messages.length > 0 ? <>
-        <div ref={scrollRef} className="scrollbar-thin flex-1 overflow-y-auto px-4 py-6 md:px-8" data-testid="list-chat-messages"><div className="mx-auto flex max-w-[800px] flex-col gap-8 pb-8">{active.messages.map((message, index) => <MessageBody key={message.id} message={message} onCopy={copy} onRegenerate={regenerate} lastAssistant={message.role === 'assistant' && index === active.messages.length - 1} streaming={isStreaming && index === active.messages.length - 1} />)}</div></div>
+        <div ref={scrollRef} className="scrollbar-thin flex-1 overflow-y-auto px-4 py-6 md:px-8" data-testid="list-chat-messages"><div className="mx-auto flex max-w-[800px] flex-col gap-8 pb-8">{active.messages.map((message, index) => <MessageBody key={message.id} message={message} onCopy={copy} onRegenerate={regenerate} lastAssistant={message.role === 'assistant' && index === active.messages.length - 1} streaming={isStreaming && index === active.messages.length - 1} voiceEnabled={voiceEnabled} voiceRate={voiceRate} voiceName={voiceName} />)}</div></div>
       </> : <div className="scrollbar-thin flex flex-1 items-center justify-center overflow-y-auto px-5 py-8" data-testid="empty-chat"><div className="fade-in w-full max-w-[680px]"><div className="mb-6 flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-2xl border border-primary/25 bg-accent text-accent-foreground"><Sparkles size={18} /></div><div><p className="display text-xl font-bold tracking-tight">Start anywhere.</p><p className="text-xs text-muted-foreground">{selectedMode.description}</p></div></div><h1 className="display text-[clamp(2.4rem,7vw,4.4rem)] font-extrabold leading-[1.04] tracking-[-.075em]">What’s on your<br className="hidden sm:block" /> mind today?</h1><div className="mt-8 grid gap-2 sm:grid-cols-3">{examples[modeForEmpty].map((prompt, index) => <button key={prompt} onClick={() => send(undefined, prompt)} className="group min-h-[86px] rounded-xl border border-border bg-card/55 p-3.5 text-left text-xs leading-5 text-muted-foreground transition hover:border-primary/35 hover:bg-card hover:text-foreground" data-testid={`button-prompt-suggestion-${index}`}><span className="mb-2 block text-primary"><ArrowRight size={13} /></span>{prompt}</button>)}</div><p className="mt-5 text-center text-[10px] leading-5 text-muted-foreground">AI can make mistakes. Cyber safety mode is for education and defense—not real-world attack assistance.</p></div></div>}
       <div className="shrink-0 px-3 pb-3 pt-2 md:px-8 md:pb-5"><div className="mx-auto max-w-[800px]">
         {localError && <div className="mb-2 flex items-start justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-xs text-destructive" role="alert" data-testid="status-chat-error"><span>{localError}</span><button onClick={() => setLocalError('')} aria-label="Dismiss error" data-testid="button-dismiss-error"><X size={14} /></button></div>}
         {attachments.length > 0 && <div className="mb-2 flex flex-wrap gap-2" data-testid="list-attachments">{attachments.map((file, i) => <div key={`${file.filename}-${i}`} className="flex items-center gap-2 rounded-lg border border-border bg-card px-2.5 py-1.5 text-[11px]"><FileText size={13} className="text-primary" /><span className="max-w-40 truncate">{file.filename}</span>{file.truncated && <span className="text-muted-foreground">trimmed</span>}<button onClick={() => setAttachments((items) => items.filter((_, index) => i !== index))} aria-label={`Remove ${file.filename}`} data-testid={`button-remove-attachment-${i}`}><X size={12} /></button></div>)}</div>}
         <form onSubmit={(e) => send(e)} className="rounded-2xl border border-border bg-card/90 shadow-[0_8px_35px_rgba(0,0,0,.12)] focus-within:border-primary/35" data-testid="form-chat-input">
           <textarea ref={inputRef} value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder={status?.configured === false ? 'AI is not available yet' : 'Message SPPY…'} rows={2} disabled={status?.configured === false} className="max-h-40 min-h-[54px] w-full resize-none bg-transparent px-4 pt-4 text-sm leading-6 outline-none placeholder:text-muted-foreground disabled:opacity-60 md:px-5" data-testid="input-chat-message" />
-          <div className="flex items-center justify-between px-2.5 pb-2.5 pl-3 md:px-3"><div className="flex items-center gap-1"><label className={`grid h-8 w-8 cursor-pointer place-items-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground ${extraction.isPending ? 'pointer-events-none opacity-50' : ''}`} title="Attach a file"><input type="file" className="hidden" accept=".txt,.md,.csv,.json,.pdf" onChange={(e) => { void upload(e.currentTarget.files?.[0]); e.currentTarget.value = ''; }} data-testid="input-attachment" /><ImagePlus size={16} /></label><span className="hidden text-[10px] text-muted-foreground sm:block">Files are processed temporarily for this chat.</span></div>
+          <div className="flex items-center justify-between px-2.5 pb-2.5 pl-3 md:px-3"><div className="flex items-center gap-1"><label className={`grid h-8 w-8 cursor-pointer place-items-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground ${extraction.isPending ? 'pointer-events-none opacity-50' : ''}`} title="Attach a file"><input type="file" className="hidden" accept=".txt,.md,.csv,.json,.pdf" onChange={(e) => { void upload(e.currentTarget.files?.[0]); e.currentTarget.value = ''; }} data-testid="input-attachment" /><ImagePlus size={16} /></label><VoiceInputControls value={draft} onChange={setDraft} /><span className="hidden text-[10px] text-muted-foreground sm:block">Files are processed temporarily for this chat.</span></div>
             <div className="flex items-center gap-2"><span className="hidden text-[10px] text-muted-foreground sm:block" data-testid="text-usage-status">{statusText}</span>{isStreaming ? <button type="button" onClick={stop} className="flex h-9 items-center gap-2 rounded-xl border border-border px-3 text-xs hover:bg-secondary" data-testid="button-stop-generation"><Square size={13} />Stop</button> : <button type="submit" disabled={disabled || completed.isPending || (!draft.trim() && !attachments.length)} className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40" aria-label="Send message" data-testid="button-send-message">{streamMutation.isPending || extraction.isPending || completed.isPending ? <LoaderCircle className="animate-spin" size={15} /> : <Send size={15} />}</button>}</div>
           </div>
         </form>
@@ -387,7 +465,11 @@ function TextPage({ title, eyebrow, children, theme, toggleTheme }: { title: str
   return <div className="app-shell"><SiteHeader theme={theme} toggleTheme={toggleTheme} /><main className="mx-auto min-h-[60vh] max-w-4xl px-6 py-16 md:py-24"><span className="mono text-[10px] tracking-[.2em] text-primary">{eyebrow}</span><h1 className="display mt-4 text-5xl font-extrabold tracking-[-.065em] md:text-7xl">{title}</h1><div className="mt-10 max-w-3xl space-y-6 text-sm leading-7 text-muted-foreground">{children}</div></main><Footer /></div>;
 }
 function ExplorePage({ theme, toggleTheme }: { theme: Theme; toggleTheme: () => void }) {
-  return <TextPage title="Find your mode." eyebrow="SPPY / EXPLORE" theme={theme} toggleTheme={toggleTheme}><p className="max-w-xl text-base">A small set of useful starting points. Each mode shapes how SPPY approaches your prompt—not what you’re allowed to ask.</p><div className="mt-8 grid gap-3 sm:grid-cols-2">{modes.map((mode) => { const Icon = mode.icon; return <Link href={`/chat?mode=${mode.id}`} className="group rounded-2xl border border-border bg-card/50 p-5 transition hover:border-primary/40" key={mode.id} data-testid={`card-explore-${mode.id}`}><div className="flex items-start justify-between"><span className="grid h-9 w-9 place-items-center rounded-xl bg-accent text-accent-foreground"><Icon size={17} /></span><ArrowRight size={15} className="text-muted-foreground group-hover:text-primary" /></div><h2 className="display mt-7 text-lg font-bold text-foreground">{mode.name}</h2><p className="mt-1 text-xs leading-5">{mode.description}</p>{mode.id === 'research' && <p className="mt-3 rounded-lg bg-secondary px-3 py-2 text-[10px] leading-4">Research does not browse the web or retrieve live sources.</p>}{mode.id === 'cyber' && <p className="mt-3 rounded-lg bg-secondary px-3 py-2 text-[10px] leading-4">For learning and defense. Not for real-world attack assistance.</p>}</Link>; })}</div></TextPage>;
+  return <TextPage title="Find your mode." eyebrow="SPPY / EXPLORE" theme={theme} toggleTheme={toggleTheme}>
+    <p className="max-w-xl text-base">A small set of useful starting points. Each mode shapes how SPPY approaches your prompt—not what you’re allowed to ask.</p>
+    <div className="mt-8 grid gap-3 sm:grid-cols-2">{modes.map((mode) => { const Icon = mode.icon; return <Link href={`/chat?mode=${mode.id}`} className="group rounded-2xl border border-border bg-card/50 p-5 transition hover:border-primary/40" key={mode.id} data-testid={`card-explore-${mode.id}`}><div className="flex items-start justify-between"><span className="grid h-9 w-9 place-items-center rounded-xl bg-accent text-accent-foreground"><Icon size={17} /></span><ArrowRight size={15} className="text-muted-foreground group-hover:text-primary" /></div><h2 className="display mt-7 text-lg font-bold text-foreground">{mode.name}</h2><p className="mt-1 text-xs leading-5">{mode.description}</p>{mode.id === 'research' && <p className="mt-3 rounded-lg bg-secondary px-3 py-2 text-[10px] leading-4">Research does not browse the web or retrieve live sources.</p>}{mode.id === 'cyber' && <p className="mt-3 rounded-lg bg-secondary px-3 py-2 text-[10px] leading-4">For learning and defense. Not for real-world attack assistance.</p>}</Link>; })}</div>
+    <Link href="/motion-lab" className="group mt-4 flex flex-col justify-between gap-4 rounded-2xl border border-primary/25 bg-accent/25 p-5 transition hover:border-primary/45 sm:flex-row sm:items-center" data-testid="card-explore-motion-lab"><div><span className="mono text-[9px] tracking-[.16em] text-primary">SPPY MOTION LAB</span><h2 className="display mt-2 text-xl font-bold text-foreground">Your hands. Your movements. Your digital world.</h2><p className="mt-2 text-xs leading-5 text-muted-foreground">Try local, browser-based hand tracking. Camera access stays off until you enable it.</p></div><span className="inline-flex shrink-0 items-center gap-2 text-xs font-semibold text-primary">Open Motion Lab <ArrowRight size={14} className="transition group-hover:translate-x-1" /></span></Link>
+  </TextPage>;
 }
 function AboutPage({ theme, toggleTheme }: { theme: Theme; toggleTheme: () => void }) {
   return <TextPage title="Independent by design." eyebrow="ABOUT SPPY" theme={theme} toggleTheme={toggleTheme}>
@@ -433,6 +515,7 @@ function PolicyPage({ kind, theme, toggleTheme }: { kind: 'privacy' | 'terms'; t
     {privacy ? <>
       <section><h2 className="display mb-2 text-xl font-bold text-foreground">Guest workspace</h2><p>SPPY does not require an account. Conversation history and preferences are stored in local browser storage on this device. They are not saved to a conversation history on the SPPY server. Anyone with access to this browser profile may be able to view or clear that local data. Use Settings to clear your history.</p></section>
       <section><h2 className="display mb-2 text-xl font-bold text-foreground">AI requests</h2><p>When you send a prompt or upload a file, that content is sent to the SPPY service and configured AI provider to process your request. Attachments are submitted to the temporary extraction endpoint; extracted text is used in your current request. Do not submit information you are not comfortable sharing with the configured provider.</p></section>
+      <section><h2 className="display mb-2 text-xl font-bold text-foreground">Motion Lab and voice</h2><p>The Motion Lab asks for camera permission only when you select Enable camera. Hand-tracking frames are processed locally in your browser and are not uploaded, recorded, or stored by SPPY. Optional voice input uses your browser’s speech recognition feature; depending on the browser, audio may be processed by its speech service. Optional response speech uses browser speech synthesis and plays only when you press Play. Voice text is sent to the AI provider only if you choose to submit it as a prompt.</p></section>
       <section><h2 className="display mb-2 text-xl font-bold text-foreground">Technical data</h2><p>The service may process request data needed to operate, secure, and rate-limit the platform. The specific provider, model, and usage allowance are shown in the workspace when available. SPPY does not claim that AI provider processing is end-to-end private.</p></section>
       <section><h2 className="display mb-2 text-xl font-bold text-foreground">Your choices</h2><p>You can avoid sending sensitive data, remove local conversations, or stop using the service at any time. Browser storage can also be cleared through your browser settings.</p></section>
     </> : <>
@@ -451,6 +534,7 @@ function WorkspaceApp() {
   const [location, setLocation] = useLocation();
   const [conversations, setConversations] = useState<Conversation[]>(readConversations);
   const [theme, setTheme] = useState<Theme>(readTheme);
+  const [voicePreferences, setVoicePreferences] = useState<VoicePreferences>(readVoicePreferences);
   const [notice, setNotice] = useState('');
   const [confirm, setConfirm] = useState<null | { kind: 'delete' | 'clear'; item?: Conversation }>(null);
   const [renameItem, setRenameItem] = useState<Conversation | null>(null);
@@ -481,7 +565,16 @@ function WorkspaceApp() {
     }, 250);
     return () => { if (persistTimer.current) window.clearTimeout(persistTimer.current); };
   }, [conversations]);
-  useEffect(() => { document.documentElement.classList.toggle('light', theme === 'light'); document.documentElement.classList.toggle('dark', theme === 'dark'); localStorage.setItem(PREF_KEY, JSON.stringify({ theme })); }, [theme]);
+  useEffect(() => {
+    document.documentElement.classList.toggle('light', theme === 'light');
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    localStorage.setItem(PREF_KEY, JSON.stringify({
+      theme,
+      voiceEnabled: voicePreferences.enabled,
+      voiceRate: voicePreferences.rate,
+      voiceName: voicePreferences.voiceName,
+    }));
+  }, [theme, voicePreferences]);
   useEffect(() => { const close = (event: KeyboardEvent) => { if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); document.querySelector<HTMLInputElement>('[data-testid="input-search-conversations"]')?.focus(); } if (event.key === 'Escape') { setMobileOpen(false); setSettingsOpen(false); setConfirm(null); setRenameItem(null); } }; window.addEventListener('keydown', close); return () => window.removeEventListener('keydown', close); }, []);
   const toggleTheme = () => setTheme((value) => value === 'dark' ? 'light' : 'dark');
   const createNew = () => { setMobileOpen(false); setLocation('/chat'); };
@@ -489,12 +582,19 @@ function WorkspaceApp() {
   const deleteConversation = (item: Conversation) => { setConversations((items) => items.filter((c) => c.id !== item.id)); if (locationRef.current === `/chat/${item.id}`) setLocation('/chat'); setConfirm(null); setNotice('Conversation deleted'); };
   const clearHistory = () => { setConversations([]); setLocation('/chat'); setConfirm(null); setSettingsOpen(false); setNotice('Local conversation history cleared'); };
   const common = { theme, toggleTheme };
+  const chatVoiceProps = {
+    voiceEnabled: voicePreferences.enabled,
+    voiceRate: voicePreferences.rate,
+    voiceName: voicePreferences.voiceName,
+  };
+  const openMotionHelp = (question: string) => setLocation(`/chat?mode=general&prompt=${encodeURIComponent(question)}`);
   return <div className="app-shell">
     <Switch>
       <Route path="/" component={() => <HomePage {...common} />} />
-      <Route path="/chat" component={() => <ChatScreen {...common} conversations={conversations} setConversations={setConversations} onNew={createNew} onRename={setRenameItem} onDelete={(item) => setConfirm({ kind: 'delete', item })} onClear={() => setConfirm({ kind: 'clear' })} onSettings={() => setSettingsOpen(true)} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} setNotice={setNotice} />} />
-      <Route path="/chat/:conversationId" component={() => <ChatScreen {...common} conversations={conversations} setConversations={setConversations} onNew={createNew} onRename={setRenameItem} onDelete={(item) => setConfirm({ kind: 'delete', item })} onClear={() => setConfirm({ kind: 'clear' })} onSettings={() => setSettingsOpen(true)} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} setNotice={setNotice} />} />
+      <Route path="/chat" component={() => <ChatScreen {...common} {...chatVoiceProps} conversations={conversations} setConversations={setConversations} onNew={createNew} onRename={setRenameItem} onDelete={(item) => setConfirm({ kind: 'delete', item })} onClear={() => setConfirm({ kind: 'clear' })} onSettings={() => setSettingsOpen(true)} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} setNotice={setNotice} />} />
+      <Route path="/chat/:conversationId" component={() => <ChatScreen {...common} {...chatVoiceProps} conversations={conversations} setConversations={setConversations} onNew={createNew} onRename={setRenameItem} onDelete={(item) => setConfirm({ kind: 'delete', item })} onClear={() => setConfirm({ kind: 'clear' })} onSettings={() => setSettingsOpen(true)} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} setNotice={setNotice} />} />
       <Route path="/explore" component={() => <ExplorePage {...common} />} />
+      <Route path="/motion-lab" component={() => <div className="app-shell"><SiteHeader {...common} /><MotionLabPage {...common} onAskSppy={openMotionHelp} /><Footer /></div>} />
       <Route path="/about" component={() => <AboutPage {...common} />} />
       <Route path="/projects" component={() => <ProjectsPage {...common} />} />
       <Route path="/privacy" component={() => <PolicyPage {...common} kind="privacy" />} />
@@ -504,7 +604,7 @@ function WorkspaceApp() {
     {confirm?.kind === 'delete' && confirm.item && <Confirmation title="Delete this conversation?" detail="This removes the conversation from this browser. This cannot be undone." confirmText="Delete conversation" danger onCancel={() => setConfirm(null)} onConfirm={() => deleteConversation(confirm.item!)} />}
     {confirm?.kind === 'clear' && <Confirmation title="Clear all conversations?" detail="Every saved conversation in this browser will be permanently removed. This cannot be undone." confirmText="Clear history" danger onCancel={() => setConfirm(null)} onConfirm={clearHistory} />}
     {renameItem && <RenameDialog item={renameItem} onSave={(value) => rename(renameItem, value)} onCancel={() => setRenameItem(null)} />}
-    {settingsOpen && <SettingsDialog theme={theme} toggleTheme={toggleTheme} onClear={() => { setSettingsOpen(false); setConfirm({ kind: 'clear' }); }} onClose={() => setSettingsOpen(false)} />}
+    {settingsOpen && <SettingsDialog theme={theme} toggleTheme={toggleTheme} onClear={() => { setSettingsOpen(false); setConfirm({ kind: 'clear' }); }} onClose={() => setSettingsOpen(false)} voiceEnabled={voicePreferences.enabled} onVoiceEnabledChange={(enabled) => setVoicePreferences((current) => ({ ...current, enabled }))} voiceRate={voicePreferences.rate} onVoiceRateChange={(rate) => setVoicePreferences((current) => ({ ...current, rate }))} voiceName={voicePreferences.voiceName} onVoiceNameChange={(voiceName) => setVoicePreferences((current) => ({ ...current, voiceName }))} />}
     <Toast notice={notice} onClose={() => setNotice('')} />
   </div>;
 }
