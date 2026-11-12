@@ -38,15 +38,18 @@ The API reports a clear setup state until its server environment includes an AI 
 
 ## AI provider configuration
 
-Required server-side secret:
+Required server-side secret (set one of these):
 
-- `AI_API_KEY` — the provider API key. Set it in Replit Secrets for the workspace preview and in Netlify environment variables for a Netlify deployment.
+- `GEMINI_API_KEY` — the Google Gemini API key. Preferred for Gemini deployments.
+- `AI_API_KEY` — generic provider API key. Used as a fallback if `GEMINI_API_KEY` is not set.
+
+Set either one in Replit Secrets for the workspace preview and in Netlify environment variables for a Netlify deployment.
 
 Optional server-side settings:
 
-- `AI_API_BASE_URL` — OpenAI-compatible API base URL; defaults to `https://api.openai.com/v1`.
-- `AI_MODEL` — model name; defaults to `gpt-5-mini`.
-- `AI_PROVIDER_NAME` — label shown in settings/status; defaults to `OpenAI-compatible`.
+- `AI_API_BASE_URL` — OpenAI-compatible API base URL; defaults to `https://generativelanguage.googleapis.com/v1beta/openai` (Google Gemini's OpenAI-compatible endpoint).
+- `AI_MODEL` — model name; defaults to `gemini-2.5-flash-lite`.
+- `AI_PROVIDER_NAME` — label shown in settings/status; defaults to `Google Gemini`.
 - `AI_DAILY_MESSAGE_LIMIT` — anonymous daily limit from 1 to 500; defaults to 30.
 
 The browser never receives the provider key. Research mode does not browse the live web. Cyber mode is limited to security education and defensive help.
@@ -57,7 +60,7 @@ The repository-root `netlify.toml` builds the SPPY web artifact, publishes `arti
 
 1. Push the repository to GitHub.
 2. Import the repository into Netlify. Keep the repository root as the base directory so the pnpm workspace and root `netlify.toml` are used.
-3. Add `AI_API_KEY` in the Netlify site's environment variables. Add `AI_API_BASE_URL`, `AI_MODEL`, `AI_PROVIDER_NAME`, and `AI_DAILY_MESSAGE_LIMIT` only if changing their defaults.
+3. Add `GEMINI_API_KEY` in the Netlify site's environment variables. Add `AI_API_BASE_URL`, `AI_MODEL`, `AI_PROVIDER_NAME`, and `AI_DAILY_MESSAGE_LIMIT` only if changing their defaults.
 4. Trigger a deploy and verify `/api/ai/status` reports the provider as configured before using chat.
 
 The Netlify functions use Netlify Blobs to enforce anonymous per-session daily and per-minute limits across function instances. Only a hash of the browser-generated guest session ID and its counters are stored; no prompts, chat history, or file contents are stored there. A scheduled cleanup removes inactive counters after 30 days. The workspace Express preview uses in-memory counters, which reset when that server restarts.

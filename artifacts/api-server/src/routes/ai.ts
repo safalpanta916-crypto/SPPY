@@ -34,16 +34,17 @@ const dailyUsage = new Map<
 let requestsSinceCleanup = 0;
 
 function aiSettings() {
-  const apiKey = process.env.AI_API_KEY?.trim();
+  const apiKey = process.env.GEMINI_API_KEY?.trim() || process.env.AI_API_KEY?.trim();
   const baseUrl =
-    process.env.AI_API_BASE_URL?.trim() || "https://api.openai.com/v1";
-  const model = process.env.AI_MODEL?.trim() || "gpt-5-mini";
+    process.env.AI_API_BASE_URL?.trim() ||
+    "https://generativelanguage.googleapis.com/v1beta/openai";
+  const model = process.env.AI_MODEL?.trim() || "gemini-2.5-flash-lite";
 
   return {
     apiKey,
     baseUrl,
     model,
-    provider: process.env.AI_PROVIDER_NAME?.trim() || "OpenAI-compatible",
+    provider: process.env.AI_PROVIDER_NAME?.trim() || "Google Gemini",
   };
 }
 

@@ -106,7 +106,7 @@ async function requestProvider(
     },
     body: JSON.stringify({
       model: config.model,
-      max_completion_tokens: 2048,
+      max_tokens: 2048,
       stream,
       messages: buildMessages(input),
     }),
