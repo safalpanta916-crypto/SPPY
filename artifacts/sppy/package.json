@@ -75,6 +75,8 @@
     "@mediapipe/tasks-vision": "^1.2.2",
     "@netlify/blobs": "^11.1.7",
     "@workspace/api-zod": "workspace:*",
-    "@workspace/sppy-ai": "workspace:*"
+    "@workspace/sppy-ai": "workspace:*",
+    "mammoth": "^1.13.0",
+    "pdf-parse": "^1.1.4"
   }
 }

@@ -1,5 +1,5 @@
-import { ExtractAiAttachmentResponse } from "@workspace/api-zod";
-import { AttachmentError, extractTextFile, MAX_ATTACHMENT_BYTES } from "@workspace/sppy-ai";
+import { ExtractAiAttachmentResponse } from "../../../../lib/api-zod/src/index.ts";
+import { AttachmentError, extractTextFile, MAX_ATTACHMENT_BYTES } from "../../../../lib/sppy-ai/src/index.ts";
 import { json } from "../lib/shared.mjs";
 
 export default async function handler(request: Request): Promise<Response> {

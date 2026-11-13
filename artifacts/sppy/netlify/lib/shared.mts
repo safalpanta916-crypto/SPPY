@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { getStore } from "@netlify/blobs";
-import { GetAiStatusResponse } from "@workspace/api-zod";
-import { AiProviderError, type ProviderConfig } from "@workspace/sppy-ai";
+import { GetAiStatusResponse } from "../../../../lib/api-zod/src/index.ts";
+import { AiProviderError, type ProviderConfig } from "../../../../lib/sppy-ai/src/index.ts";
 
 export const MAX_DAILY_MESSAGES = 30;
 const MAX_REQUESTS_PER_MINUTE = 10;
@@ -115,11 +115,35 @@ export async function consumeGuestMessage(
     record.count += 1;
     record.minuteCount += 1;
     record.updatedAt = now;
-    const write = await store.setJSON(
-      key,
-      record,
-      current?.etag ? { onlyIfMatch: current.etag } : { onlyIfNew: true },
-    );
+let write;
+
+if (current?.etag) {
+  write = await store.setJSON(key, record, {
+    onlyIfMatch: current.etag,
+  });
+} else if (current) {
+  // Local Blobs sandbox may return an existing record without an ETag.
+  // Update that record without the onlyIfNew condition.
+  write = await store.setJSON(key, record);
+} else {
+  write = await store.setJSON(key, record, {
+    onlyIfNew: true,
+  });
+}
+
+console.log("[SPPY BLOBS DEBUG]", {
+  attempt: attempt + 1,
+  hasCurrent: Boolean(current),
+  etag: current?.etag ?? null,
+  modified: write.modified,
+});
+console.log("[SPPY BLOBS DEBUG]", {
+  attempt: attempt + 1,
+  hasCurrent: Boolean(current),
+  etag: current?.etag ?? null,
+  modified: write.modified,
+});
+
     if (write.modified) {
       return {
         allowed: true,

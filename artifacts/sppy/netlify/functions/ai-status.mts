@@ -1,4 +1,4 @@
-import { GetAiStatusQueryParams } from "@workspace/api-zod";
+import { GetAiStatusQueryParams } from "../../../../lib/api-zod/src/index.ts";
 import { aiStatus, json } from "../lib/shared.mjs";
 
 export default async function handler(request: Request): Promise<Response> {

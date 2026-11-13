@@ -1,5 +1,5 @@
-import { CreateAiCompletionBody, CreateAiCompletionResponse } from "@workspace/api-zod";
-import { createCompletion, type ChatInput } from "@workspace/sppy-ai";
+import { CreateAiCompletionBody, CreateAiCompletionResponse } from "../../../../lib/api-zod/src/index.ts";
+import { createCompletion, type ChatInput } from "../../../../lib/sppy-ai/src/index.ts";
 import {
   aiSettings,
   consumeGuestMessage,
